@@ -1,0 +1,1 @@
+SentinelVault is a highly secure document storage and question answering system. It uses advanced encryption, role-based access control, and large language models to answer user queries securely and accurately based on uploaded documents.

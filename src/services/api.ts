@@ -1,7 +1,7 @@
 import axios from 'axios'
 import router from '@/router'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sentinelvault.onrender.com'
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -13,69 +13,29 @@ export const api = axios.create({
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('jwt')
-    if (token) config.headers.Authorization = `Bearer ${token}`
+    const isAuthRoute = config.url?.includes('/Auth/login') || config.url?.includes('/Auth/register')
+    if (token && !isAuthRoute) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   error => Promise.reject(error)
 )
 
-// ── Response interceptor: handle 401 / token refresh ─────────────────────────
-let isRefreshing = false
-let failedQueue: Array<{ resolve: (v: string) => void; reject: (e: unknown) => void }> = []
-
-function processQueue(error: unknown, token: string | null = null) {
-  failedQueue.forEach(p => (error ? p.reject(error) : p.resolve(token!)))
-  failedQueue = []
-}
-
+// ── Response interceptor: handle 401 ─────────────────────────────────────────
 api.interceptors.response.use(
   response => response,
   async error => {
-    const original = error.config
-    if (error.response?.status !== 401 || original._retry) {
-      return Promise.reject(error)
-    }
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject })
-      }).then(token => {
-        original.headers.Authorization = `Bearer ${token}`
-        return api(original)
-      })
-    }
-
-    original._retry = true
-    isRefreshing = true
-
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (!refreshToken) {
+    if (error.response?.status === 401) {
       clearAuthAndRedirect()
-      return Promise.reject(error)
     }
-
-    try {
-      const { data } = await axios.post(`${BASE_URL}/api/auth/refresh`, { refreshToken })
-      localStorage.setItem('jwt', data.token)
-      localStorage.setItem('refreshToken', data.refreshToken)
-      api.defaults.headers.common.Authorization = `Bearer ${data.token}`
-      processQueue(null, data.token)
-      original.headers.Authorization = `Bearer ${data.token}`
-      return api(original)
-    } catch (refreshError) {
-      processQueue(refreshError, null)
-      clearAuthAndRedirect()
-      return Promise.reject(refreshError)
-    } finally {
-      isRefreshing = false
-    }
+    return Promise.reject(error)
   }
 )
 
 function clearAuthAndRedirect() {
   localStorage.removeItem('jwt')
-  localStorage.removeItem('refreshToken')
-  localStorage.removeItem('auth-user')
+  localStorage.removeItem('auth')
   router.push('/login')
 }
 

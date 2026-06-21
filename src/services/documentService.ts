@@ -1,10 +1,29 @@
 import api from './api'
-import type { Document } from '@/types'
+import type { Document, DocumentStatus, ApiResponse, BackendDocumentData, BackendUploadData } from '@/types'
+
+function mapStatus(raw: string | null | undefined): DocumentStatus {
+  const s = (raw ?? '').toLowerCase()
+  if (s === 'completed' || s === 'ready') return 'ready'
+  if (s === 'processing' || s === 'indexing') return 'processing'
+  if (s === 'failed' || s === 'error') return 'error'
+  return 'processing'
+}
+
+function mapDocument(d: BackendDocumentData): Document {
+  return {
+    id: d.id,
+    name: d.fileName ?? '',
+    size: 0,
+    type: '',
+    status: mapStatus(d.status),
+    uploadedAt: new Date(d.uploadedAt)
+  }
+}
 
 export const documentService = {
   async list(): Promise<Document[]> {
-    const { data } = await api.get<Document[]>('/api/documents')
-    return data
+    const { data } = await api.get<ApiResponse<BackendDocumentData[]>>('/api/v1/Documents')
+    return (data.data ?? []).map(mapDocument)
   },
 
   async upload(
@@ -14,27 +33,47 @@ export const documentService = {
     const formData = new FormData()
     formData.append('file', file)
 
-    const { data } = await api.post<Document>('/api/documents/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: event => {
-        if (event.total) {
-          onProgress(Math.round((event.loaded / event.total) * 100))
+    const { data } = await api.post<ApiResponse<BackendUploadData>>(
+      '/api/v1/Documents/upload',
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: event => {
+          if (event.total) onProgress(Math.round((event.loaded / event.total) * 100))
         }
       }
-    })
-    return data
+    )
+
+    const d = data.data
+    return {
+      id: d.documentId,
+      name: d.fileName ?? file.name,
+      size: d.fileSize ?? file.size,
+      type: file.type,
+      status: mapStatus(d.status),
+      uploadedAt: new Date(d.uploadedAt)
+    }
   },
 
-  async delete(id: string): Promise<void> {
-    await api.delete(`/api/documents/${id}`)
+  async getById(id: string): Promise<Document> {
+    const { data } = await api.get<ApiResponse<BackendDocumentData>>(`/api/v1/Documents/${id}`)
+    return mapDocument(data.data)
+  },
+
+  // No delete endpoint on the backend — removed from API calls
+  async delete(_id: string): Promise<void> {
+    // intentional no-op: backend has no delete endpoint
   },
 
   async getStatus(id: string): Promise<Pick<Document, 'id' | 'status' | 'progress'>> {
-    const { data } = await api.get(`/api/documents/${id}/status`)
-    return data
+    const doc = await documentService.getById(id)
+    return { id: doc.id, status: doc.status, progress: doc.progress }
   },
 
-  // Poll a document's status until it becomes ready or errors
+  async updateStatus(id: string, status: number): Promise<void> {
+    await api.put(`/api/v1/Documents/${id}/status`, { status })
+  },
+
   async pollUntilReady(
     id: string,
     onUpdate: (status: Document['status'], progress?: number) => void,
@@ -51,6 +90,7 @@ export const documentService = {
           if (status === 'ready' || status === 'error') {
             clearInterval(timer)
             status === 'ready' ? resolve() : reject(new Error('Processing failed'))
+            return
           }
           if (attempts >= maxAttempts) {
             clearInterval(timer)

@@ -4,9 +4,14 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import ToastContainer from '@/components/common/ToastContainer.vue'
-import { useThemeStore } from '@/stores/themeStore'
+import { useAuthStore } from '@/stores/authStore'
 
-useThemeStore() // Initialize theme
+const auth = useAuthStore()
+
+onMounted(() => {
+  auth.init()
+})
 </script>

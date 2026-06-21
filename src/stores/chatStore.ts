@@ -15,7 +15,12 @@ export const useChatStore = defineStore('chat', () => {
 
   // ── Grouped chat history by date ──────────────────────────────────────────
   const groupedChats = computed(() => {
-    const groups: Record<string, Chat[]> = { Today: [], Yesterday: [], 'Last 7 days': [], Older: [] }
+    const groups: {
+      Today: Chat[]
+      Yesterday: Chat[]
+      'Last 7 days': Chat[]
+      Older: Chat[]
+    } = { Today: [], Yesterday: [], 'Last 7 days': [], Older: [] }
     const now = new Date()
     for (const chat of [...chats.value].sort(
       (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()

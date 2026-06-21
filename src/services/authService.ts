@@ -1,92 +1,70 @@
 import api from './api'
-import type { LoginCredentials, AuthResponse } from '@/types'
+import type { LoginCredentials, RegisterCredentials, AuthResponse, ApiResponse, BackendAuthData, AuthUser } from '@/types'
 
-// 🔁 Toggle this when backend is ready
-const USE_MOCK_AUTH = true
+function mapUser(d: BackendAuthData): AuthUser {
+  const name = [d.firstName, d.lastName].filter(Boolean).join(' ') || d.email
+  const initials = (
+    (d.firstName?.[0] ?? '') + (d.lastName?.[0] ?? '')
+  ).toUpperCase() || d.email.substring(0, 2).toUpperCase()
+  
+  return {
+    id: d.userId,
+    email: d.email,
+    name,
+    role: 'user',
+    avatarInitials: initials
+  }
+}
 
 export const authService = {
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    if (USE_MOCK_AUTH) {
-      // =========================
-      // 🚀 MOCK LOGIN (ACTIVE)
-      // =========================
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            token: 'mock-jwt-token-12345',
-            refreshToken: 'mock-refresh-token-12345',
-            expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            user: {
-              id: 'mock-user-1',
-              email: credentials.email,
-              name: 'Demo User',
-              role: 'user',
-              avatarInitials: credentials.email.substring(0, 2).toUpperCase()
-            }
-          })
-        }, 800)
-      })
-    }
+  async register(credentials: RegisterCredentials): Promise<AuthResponse> {
+    const { data } = await api.post<ApiResponse<BackendAuthData>>('/api/v1/Auth/register', credentials)
+    const d = data.data
+    const expiresAt = Math.floor(new Date(d.tokenExpiry).getTime() / 1000)
 
-    // =========================
-    // 🔌 REAL BACKEND (DISABLED FOR NOW)
-    // =========================
-    /*
-    const { data } = await api.post<AuthResponse>(
-      '/api/auth/login',
-      credentials
-    )
-    return data
-    */
+    return {
+      token: d.token,
+      expiresAt,
+      user: mapUser(d)
+    }
+  },
+
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    const { data } = await api.post<ApiResponse<BackendAuthData>>('/api/v1/Auth/login', {
+      email: credentials.email,
+      password: credentials.password
+    })
+
+    const d = data.data
+    const expiresAt = Math.floor(new Date(d.tokenExpiry).getTime() / 1000)
+
+    return {
+      token: d.token,
+      expiresAt,
+      user: mapUser(d)
+    }
+  },
+
+  async getClaims(): Promise<AuthUser | null> {
+    try {
+      const { data } = await api.get<ApiResponse<any>>('/api/v1/Auth/claims')
+      // Note: Endpoint returns ObjectApiResponse. 
+      // If the API returns the user info, we can map it here.
+      // If it just returns standard claims, we can return null or map accordingly.
+      // Assuming it returns the user object in data:
+      if (data.data) {
+        // Adapt depending on actual response. If it's the token user ID:
+        const claimsUser = { ...data.data, userId: data.data.id || data.data.userId }
+        return mapUser(claimsUser)
+      }
+      return null
+    } catch {
+      return null
+    }
   },
 
   async logout(): Promise<void> {
-    if (USE_MOCK_AUTH) {
-      // MOCK: just clear local storage
-      localStorage.removeItem('token')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('jwt-expires')
-      return
-    }
-
-    // REAL BACKEND
-    /*
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (refreshToken) {
-      await api.post('/api/auth/logout', { refreshToken }).catch(() => {})
-    }
-    */
-  },
-
-  async refresh(refreshToken: string): Promise<AuthResponse> {
-    if (USE_MOCK_AUTH) {
-      // MOCK: simulate refresh
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            token: 'mock-new-token-67890',
-            refreshToken: 'mock-refresh-token-12345',
-            expiresAt: Math.floor(Date.now() / 1000) + 3600,
-            user: {
-              id: 'mock-user-1',
-              email: 'demo@example.com',
-              name: 'Demo User',
-              role: 'user',
-              avatarInitials: 'DE'
-            }
-          })
-        }, 500)
-      })
-    }
-
-    // REAL BACKEND
-    /*
-    const { data } = await api.post<AuthResponse>(
-      '/api/auth/refresh',
-      { refreshToken }
-    )
-    return data
-    */
+    // No logout endpoint on this backend
   },
 
   isTokenExpired(): boolean {

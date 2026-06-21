@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { AuthUser } from '@/types'
+import type { AuthUser, RegisterCredentials } from '@/types'
 import { authService } from '@/services/authService'
 
 export const useAuthStore = defineStore(
@@ -8,7 +8,6 @@ export const useAuthStore = defineStore(
   () => {
     const user = ref<AuthUser | null>(null)
     const token = ref<string | null>(null)
-    const refreshToken = ref<string | null>(null)
     const expiresAt = ref<number | null>(null)
 
     const isAuthenticated = computed(() => !!token.value && !isExpired.value)
@@ -17,16 +16,32 @@ export const useAuthStore = defineStore(
       return Date.now() >= expiresAt.value * 1000 - 60_000
     })
 
+    async function register(credentials: RegisterCredentials): Promise<void> {
+      const response = await authService.register(credentials)
+      token.value = response.token
+      expiresAt.value = response.expiresAt
+      user.value = response.user
+      localStorage.setItem('jwt', response.token)
+    }
+
     async function login(email: string, password: string): Promise<void> {
       const response = await authService.login({ email, password })
       token.value = response.token
-      refreshToken.value = response.refreshToken
       expiresAt.value = response.expiresAt
       user.value = response.user
 
-      // Also sync with localStorage for axios interceptors
       localStorage.setItem('jwt', response.token)
-      localStorage.setItem('refreshToken', response.refreshToken)
+    }
+
+    async function init(): Promise<void> {
+      if (isAuthenticated.value) {
+        const claimsUser = await authService.getClaims()
+        if (claimsUser) {
+          user.value = claimsUser
+        } else {
+          logout()
+        }
+      }
     }
 
     async function logout(): Promise<void> {
@@ -37,19 +52,17 @@ export const useAuthStore = defineStore(
     function $reset() {
       user.value = null
       token.value = null
-      refreshToken.value = null
       expiresAt.value = null
       localStorage.removeItem('jwt')
-      localStorage.removeItem('refreshToken')
     }
 
-    return { user, token, refreshToken, expiresAt, isAuthenticated, isExpired, login, logout, $reset }
+    return { user, token, expiresAt, isAuthenticated, isExpired, register, login, logout, init, $reset }
   },
   {
     persist: {
       key: 'auth',
       storage: localStorage,
-      pick: ['user', 'token', 'refreshToken', 'expiresAt']
+      pick: ['user', 'token', 'expiresAt']
     }
   }
 )

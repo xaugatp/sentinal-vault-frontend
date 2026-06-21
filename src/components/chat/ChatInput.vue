@@ -1,22 +1,22 @@
 <template>
-  <div class="px-5 pb-4 pt-3 border-t border-zinc-200 dark:border-[#1a1a22]">
+  <div class="px-6 pb-6 pt-2 bg-gradient-to-t from-zinc-50 via-zinc-50 to-transparent dark:from-premium-dark dark:via-premium-dark dark:to-transparent z-10 relative">
     <!-- File preview -->
     <Transition name="slide-up">
-      <div v-if="pendingFile" class="flex items-center gap-2.5 bg-blue-50 dark:bg-[#0e1d38] border border-blue-200 dark:border-[#1a2d52] rounded-xl px-3.5 py-2.5 mb-2.5">
-        <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-[#1c3a5e] flex items-center justify-center flex-shrink-0">
-          <svg class="w-3.5 h-3.5 text-blue-500 dark:text-[#6ea8fe]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div v-if="pendingFile" class="flex items-center gap-3 bg-white dark:bg-premium-card border border-zinc-200 dark:border-premium-border rounded-xl px-4 py-3 mb-3 shadow-sm max-w-sm">
+        <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0 text-indigo-600 dark:text-indigo-400">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-[12.5px] text-zinc-900 dark:text-zinc-300 truncate">{{ pendingFile.name }}</p>
-          <p class="text-[10px] text-zinc-500 dark:text-zinc-700">{{ formatSize(pendingFile.size) }}</p>
+          <p class="text-[13px] font-medium text-zinc-900 dark:text-zinc-200 truncate">{{ pendingFile.name }}</p>
+          <p class="text-[11px] text-zinc-500 dark:text-zinc-500">{{ formatSize(pendingFile.size) }}</p>
         </div>
         <button
-          class="text-zinc-700 hover:text-zinc-400 p-1 rounded transition-colors"
+          class="text-zinc-400 hover:text-red-500 dark:hover:text-red-400 p-1.5 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
           @click="emit('clearFile')"
         >
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
@@ -25,20 +25,20 @@
 
     <!-- Input box -->
     <div
-      class="flex items-end gap-2 bg-white dark:bg-[#18181e] border rounded-xl px-3 py-2.5 transition-colors shadow-sm dark:shadow-none"
-      :class="isFocused ? 'border-blue-300 dark:border-[#2a4a7a]' : 'border-zinc-200 dark:border-[#28282e]'"
+      class="flex items-end gap-3 bg-white dark:bg-premium-card border rounded-2xl px-4 py-3 transition-all shadow-md dark:shadow-none"
+      :class="isFocused ? 'border-blue-500 ring-4 ring-blue-500/10 dark:border-blue-500/50 dark:ring-blue-500/10' : 'border-zinc-200 dark:border-premium-border hover:border-zinc-300 dark:hover:border-zinc-700'"
     >
       <!-- Attach button -->
       <button
-        class="w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0 transition-all"
+        class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all mb-0.5"
         :class="isStreaming
-          ? 'border-zinc-200 dark:border-[#222228] text-zinc-400 dark:text-zinc-800 cursor-not-allowed'
-          : 'border-zinc-200 dark:border-[#28282e] text-zinc-500 dark:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-[#1e1e28] hover:text-zinc-800 dark:hover:text-zinc-300 hover:border-zinc-300 dark:hover:border-[#3a3a46]'"
+          ? 'text-zinc-400 dark:text-zinc-600 cursor-not-allowed'
+          : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-premium-darker hover:text-blue-600 dark:hover:text-blue-400'"
         title="Attach file"
         :disabled="isStreaming"
         @click="fileInputRef?.click()"
       >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
         </svg>
       </button>
@@ -55,7 +55,7 @@
       <textarea
         ref="textareaRef"
         v-model="inputText"
-        class="flex-1 bg-transparent border-none outline-none text-[14px] text-zinc-900 dark:text-zinc-200 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none font-sans leading-relaxed"
+        class="flex-1 bg-transparent border-none outline-none text-[15px] text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 resize-none font-sans leading-relaxed py-2 max-h-[200px]"
         :class="isStreaming ? 'cursor-not-allowed opacity-60' : ''"
         placeholder="Ask anything about your documents…"
         rows="1"
@@ -69,29 +69,29 @@
 
       <!-- Send / Stop button -->
       <button
-        class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all"
+        class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all mb-0.5 shadow-sm"
         :class="canSend
-          ? 'bg-blue-50 dark:bg-[#1c3a6e] border border-blue-200 dark:border-[#2a5090] text-blue-600 dark:text-[#6ea8fe] hover:bg-blue-100 dark:hover:bg-[#1f4480]'
+          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20'
           : isStreaming
-            ? 'bg-red-50 dark:bg-[#1a0e0e] border border-red-200 dark:border-[#3a1a1a] text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-[#200e0e]'
-            : 'bg-zinc-100 dark:bg-[#1a1a24] border border-zinc-200 dark:border-[#28282e] text-zinc-400 dark:text-zinc-700 cursor-not-allowed'"
+            ? 'bg-red-500 text-white hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/20 animate-pulse'
+            : 'bg-zinc-100 dark:bg-premium-darker text-zinc-400 dark:text-zinc-600 cursor-not-allowed'"
         :title="isStreaming ? 'Stop' : 'Send'"
         @click="isStreaming ? emit('stop') : handleSend()"
       >
         <!-- Send icon -->
-        <svg v-if="!isStreaming" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <svg v-if="!isStreaming" class="w-4 h-4 ml-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
         </svg>
         <!-- Stop icon -->
-        <svg v-else class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+        <svg v-else class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
           <rect x="6" y="6" width="12" height="12" rx="2"/>
         </svg>
       </button>
     </div>
 
     <!-- Hints -->
-    <p class="text-[11px] text-zinc-500 dark:text-zinc-800 text-center mt-2">
-      Enter to send · Shift+Enter for new line · PDF, DOCX, TXT, MD supported
+    <p class="text-[12px] text-zinc-500 dark:text-zinc-500 text-center mt-3 font-medium tracking-wide">
+      Enter to send <span class="mx-1.5 opacity-50">·</span> Shift+Enter for new line <span class="mx-1.5 opacity-50">·</span> PDF, DOCX, TXT, MD supported
     </p>
   </div>
 </template>
@@ -135,7 +135,7 @@ function autoResize() {
   const el = textareaRef.value
   if (!el) return
   el.style.height = 'auto'
-  el.style.height = Math.min(el.scrollHeight, 160) + 'px'
+  el.style.height = Math.min(el.scrollHeight, 200) + 'px'
 }
 
 function handleFileSelect(e: Event) {
@@ -152,6 +152,6 @@ function formatSize(bytes: number): string {
 </script>
 
 <style scoped>
-.slide-up-enter-active, .slide-up-leave-active { transition: all 0.2s ease; }
-.slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translateY(6px); }
+.slide-up-enter-active, .slide-up-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.slide-up-enter-from, .slide-up-leave-to { opacity: 0; transform: translateY(10px) scale(0.98); }
 </style>

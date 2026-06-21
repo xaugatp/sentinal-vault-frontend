@@ -2,37 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-*, *::before, *::after { box-sizing: border-box; }
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
 
-html, body, #app {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
+  html, body, #app {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-zinc-50 text-zinc-900 dark:bg-premium-dark dark:text-zinc-200;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #app {
+    display: flex;
+    height: 100vh;
+  }
+
+  /* Global scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-zinc-300 dark:bg-[#2a2a32] rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-zinc-400 dark:bg-[#3a3a44]; }
+
+  /* Text selection */
+  ::selection { @apply bg-blue-500/30 text-current dark:bg-blue-500/40; }
+
+  /* Remove number input spinners */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; }
 }
 
-body {
-  @apply bg-zinc-50 text-zinc-900 dark:bg-[#0f0f11] dark:text-[#e0e0e0];
-  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer utilities {
+  .glass {
+    @apply bg-white/70 dark:bg-premium-card/70 backdrop-blur-md border border-white/20 dark:border-premium-border/50;
+  }
 }
-
-#app {
-  display: flex;
-  height: 100vh;
-}
-
-/* Global scrollbar */
-::-webkit-scrollbar       { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #222228; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #2a2a32; }
-
-/* Text selection */
-::selection { background: #1c3a6e; color: #e0e0e0; }
-
-/* Remove number input spinners */
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; }

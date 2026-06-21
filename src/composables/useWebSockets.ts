@@ -1,7 +1,7 @@
 import { ref, onUnmounted } from 'vue'
 import type { WsStatus, WsMessage, WsQueryPayload } from '@/types'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sentinelvault.onrender.com'
 const WS_URL = BASE_URL.replace(/^http/, 'ws')
 
 export function useWebSocket() {

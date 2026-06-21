@@ -4,6 +4,12 @@ export interface LoginCredentials {
   password: string
 }
 
+export interface RegisterCredentials extends LoginCredentials {
+  firstName?: string
+  lastName?: string
+  confirmPassword?: string
+}
+
 export interface AuthUser {
   id: string
   email: string
@@ -14,7 +20,7 @@ export interface AuthUser {
 
 export interface AuthResponse {
   token: string
-  refreshToken: string
+  refreshToken?: string
   expiresAt: number
   user: AuthUser
 }
@@ -85,4 +91,41 @@ export interface Toast {
   title: string
   message?: string
   duration?: number
+}
+
+// ─── API Wrappers ─────────────────────────────────────────────────────────────
+export interface ApiResponse<T> {
+  success: boolean
+  statusCode: number
+  message?: string
+  data: T
+  error?: { code?: string; description?: string }
+  timestamp: string
+}
+
+export interface BackendAuthData {
+  userId: string
+  email: string
+  firstName?: string
+  lastName?: string
+  token: string
+  tokenExpiry: string
+}
+
+export interface BackendDocumentData {
+  id: string
+  fileName: string
+  filePath?: string
+  userId?: string
+  createdDate?: string
+  uploadedAt: string
+  status: string
+}
+
+export interface BackendUploadData {
+  documentId: string
+  fileName: string
+  fileSize: number
+  uploadedAt: string
+  status: string
 }

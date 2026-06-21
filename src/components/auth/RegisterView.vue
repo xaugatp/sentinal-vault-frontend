@@ -1,21 +1,21 @@
 <template>
   <div class="min-h-screen bg-zinc-50 dark:bg-premium-dark flex items-center justify-center p-4 relative overflow-hidden">
     <!-- Premium background gradients -->
-    <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-600/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen animate-pulse-slow"></div>
+    <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-500/20 dark:bg-blue-600/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen"></div>
     <div class="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-500/20 dark:bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none mix-blend-screen"></div>
 
     <div class="relative w-full max-w-sm z-10 animate-fade-in">
       <!-- Card -->
-      <div class="glass rounded-3xl p-8 shadow-2xl dark:shadow-blue-900/5 transition-transform duration-500">
+      <div class="glass rounded-3xl p-8 shadow-2xl dark:shadow-blue-900/5">
         <!-- Logo -->
         <div class="flex flex-col items-center mb-8 animate-slide-up">
           <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30 flex items-center justify-center mb-5">
             <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">Welcome back</h1>
-          <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">Sign in to SentinelVault</p>
+          <h1 class="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">Create an account</h1>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-2">Join SentinelVault today</p>
         </div>
 
         <!-- Error banner -->
@@ -29,9 +29,31 @@
         </Transition>
 
         <!-- Form -->
-        <form class="flex flex-col gap-4.5" @submit.prevent="handleLogin">
+        <form class="flex flex-col gap-4.5" @submit.prevent="handleRegister">
+          <!-- Name Fields -->
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-xs text-zinc-600 dark:text-zinc-400 font-medium mb-1.5 ml-1">First name</label>
+              <input
+                v-model="form.firstName"
+                type="text"
+                placeholder="John"
+                class="w-full bg-zinc-100/50 dark:bg-premium-darker/50 border border-zinc-200 dark:border-premium-border rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 outline-none focus:border-blue-500 dark:focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
+              />
+            </div>
+            <div class="flex-1">
+              <label class="block text-xs text-zinc-600 dark:text-zinc-400 font-medium mb-1.5 ml-1">Last name</label>
+              <input
+                v-model="form.lastName"
+                type="text"
+                placeholder="Doe"
+                class="w-full bg-zinc-100/50 dark:bg-premium-darker/50 border border-zinc-200 dark:border-premium-border rounded-xl px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 outline-none focus:border-blue-500 dark:focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
+              />
+            </div>
+          </div>
+
           <!-- Email -->
-          <div>
+          <div class="mt-1">
             <label class="block text-xs text-zinc-600 dark:text-zinc-400 font-medium mb-1.5 ml-1">Email address</label>
             <input
               v-model="form.email"
@@ -47,14 +69,13 @@
           </div>
 
           <!-- Password -->
-          <div class="mt-2">
+          <div class="mt-1">
             <label class="block text-xs text-zinc-600 dark:text-zinc-400 font-medium mb-1.5 ml-1">Password</label>
             <div class="relative">
               <input
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="••••••••"
-                autocomplete="current-password"
                 required
                 class="w-full bg-zinc-100/50 dark:bg-premium-darker/50 border border-zinc-200 dark:border-premium-border rounded-xl px-4 py-3 pr-11 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 outline-none focus:border-blue-500 dark:focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
               />
@@ -69,20 +90,34 @@
             </div>
           </div>
 
+          <!-- Confirm Password -->
+          <div class="mt-1">
+            <label class="block text-xs text-zinc-600 dark:text-zinc-400 font-medium mb-1.5 ml-1">Confirm Password</label>
+            <div class="relative">
+              <input
+                v-model="form.confirmPassword"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="••••••••"
+                required
+                class="w-full bg-zinc-100/50 dark:bg-premium-darker/50 border border-zinc-200 dark:border-premium-border rounded-xl px-4 py-3 pr-11 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 outline-none focus:border-blue-500 dark:focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all duration-300"
+              />
+            </div>
+          </div>
+
           <!-- Submit -->
           <button
             type="submit"
             :disabled="isLoading"
-            class="mt-6 w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] font-semibold transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            class="mt-4 w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[14px] font-semibold transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <svg v-if="isLoading" class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0"/></svg>
-            {{ isLoading ? 'Authenticating…' : 'Sign in' }}
+            {{ isLoading ? 'Creating account…' : 'Sign up' }}
           </button>
         </form>
 
         <p class="text-center text-[13px] text-zinc-500 dark:text-zinc-400 mt-8">
-          Don't have an account? 
-          <RouterLink to="/register" class="text-blue-600 dark:text-premium-accent font-medium hover:underline underline-offset-4">Sign up</RouterLink>
+          Already have an account? 
+          <RouterLink to="/login" class="text-blue-600 dark:text-premium-accent font-medium hover:underline underline-offset-4">Sign in</RouterLink>
         </p>
       </div>
     </div>
@@ -91,14 +126,13 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useRouter, useRoute, RouterLink } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
-const route = useRoute()
 const auth = useAuthStore()
 
-const form = reactive({ email: '', password: '' })
+const form = reactive({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' })
 const error = ref('')
 const emailError = ref('')
 const isLoading = ref(false)
@@ -109,16 +143,25 @@ function validateEmail() {
   emailError.value = re.test(form.email) ? '' : 'Enter a valid email address'
 }
 
-async function handleLogin() {
+async function handleRegister() {
   error.value = ''
   validateEmail()
   if (emailError.value) return
+  if (form.password !== form.confirmPassword) {
+    error.value = 'Passwords do not match'
+    return
+  }
 
   isLoading.value = true
   try {
-    await auth.login(form.email, form.password)
-    const redirect = (route.query.redirect as string) || '/chat'
-    router.push(redirect)
+    await auth.register({
+      email: form.email,
+      password: form.password,
+      confirmPassword: form.confirmPassword,
+      firstName: form.firstName,
+      lastName: form.lastName
+    })
+    router.push('/chat')
   } catch (err: any) {
     const data = err.response?.data
     if (data?.error?.description) {
@@ -132,10 +175,8 @@ async function handleLogin() {
       } else {
         error.value = data.title || 'Validation error'
       }
-    } else if (err.response?.status === 401) {
-      error.value = 'Invalid email or password'
-    } else if (err.response?.status === 429) {
-      error.value = 'Too many attempts. Try again later.'
+    } else if (err.response?.status === 400) {
+      error.value = 'Invalid registration details'
     } else {
       error.value = err.message || 'Connection failed. Check your network.'
     }
